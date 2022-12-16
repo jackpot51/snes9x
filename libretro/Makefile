@@ -9,7 +9,7 @@ BACKSLASH :=
 BACKSLASH := \$(BACKSLASH)
 filter_out1 = $(filter-out $(firstword $1),$1)
 filter_out2 = $(call filter_out1,$(call filter_out1,$1))
-STATIC_LINKING=0
+STATIC_LINKING ?= 0
 
 ifeq ($(platform),)
    platform = unix
@@ -52,10 +52,16 @@ endif
 
 # Unix
 ifneq (,$(findstring unix,$(platform)))
+   ifeq ($(STATIC_LINKING),1)
+      STATIC_LINKING_LINK=1
+      TARGET := $(TARGET_NAME)_libretro.a
+	  LTO =
+   else
+      TARGET := $(TARGET_NAME)_libretro.so
+   endif
    CFLAGS += $(LTO)
    CXXFLAGS += $(LTO) -DUNZIP_SUPPORT
    LDFLAGS += $(LTO)
-   TARGET := $(TARGET_NAME)_libretro.so
    fpic := -fPIC
    ifneq ($(findstring SunOS,$(shell uname -a)),)
    CC = gcc
